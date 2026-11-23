@@ -1,103 +1,59 @@
-import{deflateSync as z,crc32 as v2}from'node:zlib';
+import{deflateSync as z}from'node:zlib';
 import{mkdirSync as m,writeFileSync as w}from'node:fs';
-import{dirname as d,resolve as r}from'node:path';
-import{fileURLToPath as u}from'node:url';
-const CS='ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789 .,:\'-()/%+&=?!\u2022';
-const FT=[[14,17,17,31,17,17,17],[30,17,17,30,17,17,30],[14,17,16,16,16,17,14],[30,17,17,17,17,17,30],[31,16,16,30,16,16,31],[31,16,16,30,16,16,16],[14,17,16,23,17,17,15],[17,17,17,31,17,17,17],[14,4,4,4,4,4,14],[7,2,2,2,2,18,12],[17,18,20,24,20,18,17],[16,16,16,16,16,16,31],[17,27,21,21,17,17,17],[17,25,21,19,17,17,17],[14,17,17,17,17,17,14],[30,17,17,30,16,16,16],[14,17,17,17,21,18,13],[30,17,17,30,20,18,17],[15,16,16,14,1,1,30],[31,4,4,4,4,4,4],[17,17,17,17,17,17,14],[17,17,17,17,17,10,4],[17,17,17,21,21,27,17],[17,17,10,4,10,17,17],[17,17,10,4,4,4,4],[31,1,2,4,8,16,31],[14,17,19,21,25,17,14],[4,12,4,4,4,4,14],[14,17,1,6,8,16,31],[31,2,4,2,1,17,14],[2,6,10,18,31,2,2],[31,16,30,1,1,17,14],[6,8,16,30,17,17,14],[31,1,2,4,8,8,8],[14,17,17,14,17,17,14],[14,17,17,15,1,2,12],[0,0,0,0,0,0,0],[0,0,0,0,0,12,12],[0,0,0,0,12,4,8],[0,12,12,0,12,12,0],[4,4,8,0,0,0,0],[0,0,0,14,0,0,0],[2,4,8,8,8,4,2],[8,4,2,2,2,4,8],[1,2,2,4,8,8,16],[25,26,2,4,8,11,19],[0,4,4,14,4,4,0],[12,18,20,8,21,18,13],[0,0,14,0,14,0,0],[14,17,1,6,4,0,4],[4,4,4,4,4,0,4],[0,0,12,12,0,0,0]];
-const W=1024,H=1024,p=Buffer.alloc(W*H*3);
-const a=[247,242,231],b=[25,23,20],d2=[166,28,28],e=[30,79,138],f=[15,107,92],g=[172,118,10],y=[96,89,80],h=[255,253,246],v=[255,255,255];
-const q=(x,y,w2,h2,c)=>{for(let j=y;j<y+h2;j++)for(let i=x;i<x+w2;i++){if(i<0||j<0||i>=W||j>=H)continue;const o=(j*W+i)*3;p[o]=c[0];p[o+1]=c[1];p[o+2]=c[2];}};
-const c=(x,y,r2,c2)=>{for(let s=-r2;s<=r2;s++){const n=Math.floor(Math.sqrt(r2*r2-s*s));q(x-n,y+s,n*2+1,1,c2);}};
-const t=(s,x,y,s2,c)=>{let X=x;for(const ch of s){const gi=CS.indexOf(ch);if(gi<0){X+=6*s2;continue;}const gl=FT[gi];for(let r2=0;r2<7;r2++)for(let b2=0;b2<5;b2++)if(gl[r2]&(16>>b2))q(X+b2*s2,y+r2*s2,s2,s2,c);X+=6*s2;}return X;};
-const n=s=>s.length*12;
-const I=(k,x,y,bg)=>{q(x,y,34,34,bg);const X=x+17,Y=y+17;
-if(k==0){c(X,Y,12,v);c(X,Y,9,bg);q(X-12,Y,24,2,v);q(X,Y-12,2,24,v);}
-else if(k==1){q(X-3,Y-3,6,6,v);q(X-2,Y-13,4,10,v);q(X-2,Y+3,4,10,v);q(X-13,Y-2,10,4,v);q(X+3,Y-2,10,4,v);q(X-13,Y-13,5,5,v);q(X+8,Y-13,5,5,v);q(X-13,Y+8,5,5,v);q(X+8,Y+8,5,5,v);}
-else if(k==2){for(let i=0;i<6;i++)q(X-2-i,Y-11+i*3,4+i*2,3,v);q(X-2,Y+7,4,4,bg);}
-else if(k==3){for(let i=0;i<4;i++)q(X-11+i*2,Y+3+i*3,22-i*4,3,v);q(X-1,Y-11,2,14,v);q(X+1,Y-11,7,4,v);}
-else if(k==4){q(X-11,Y-9,22,18,v);q(X-8,Y-6,16,12,bg);q(X-5,Y+1,3,3,v);q(X-2,Y+4,3,3,v);q(X+1,Y+1,3,3,v);q(X+4,Y-2,3,3,v);}
-else if(k==5){q(X-1,Y-12,2,24,v);q(X-12,Y-1,24,2,v);q(X-2,Y-2,4,4,v);}
-else{c(X,Y,12,v);c(X,Y,9,bg);c(X,Y,3,v);q(X-11,Y-5,22,2,v);q(X-11,Y+5,22,2,v);}};
-const L='CLIMATE - COP31|COP31 COLLAPSES, NO DEAL|ANTALYA TEXT REJECTED BY EU|AFTER 13 DAYS, NO CONSENSUS|FIRST COP TO END WITH NO DEAL.|REUTERS 06:00'.split('|');
-const E=`UKRAINE|186 RUSSIAN DRONES,|161 DOWNED|BARRAGE HITS 18 SITES;|72 JET-POWERED, AIR HIT|UKR AIR FORCE 08:07|1|1
-GAZA|ISRAELI STRIKE KILLS|THREE IN GAZA|CEASEFIRE UNDER STRAIN;|HAMAS SEEKS MEDIATORS|REUTERS 08:50|2|0
-IRAN|TWO TANKERS HIT|IN HORMUZ|TEHRAN CLAIMS US NAVY|BASES HIT, GULF TENSE|UKMTO 05:00|3|1
-N.AMERICA|TRUMP ORDERS SILENCE|ON CONGRESS|CONTRACTORS TOLD NOT TO|TALK TO LAWMAKERS|CNN 21:45|4|3
-SPORT|VERSTAPPEN WINS|VEGAS GRAND PRIX|FOURTH TITLE SEALED IN|NEON AS RIVALS FALTER|FORMULA1 05:40|5|0
-TECH|NVIDIA PLUNGES ON|SEC PROBE|CHIP GIANT DOWN 14% AS|NASDAQ HAS WORST WEEK|REUTERS 21:00|6|0`.split('\n');
-const J=`A|COP31 OMITS FOSSIL FUELS - REUTERS
-A|ZELENSKY SLAMS PATRIOT DELAYS - KYIV
-A|SPARTA II BURNS AFTER DRONE HIT - NYP
-A|131 CLASHES, POKROVSK HEAVIEST - UKR
-A|POLAND: MISSILE IN AIRSPACE - REUTERS
-A|NATO COUNCIL MEETS MONDAY - EU TODAY
-M|HAMAS SEEKS MEDIATOR MEETING - ANADOLU
-M|AOUN DEMANDS ISRAEL PULLOUT - AFP
-M|TRUMP DELAYS IRAN CALL TO 2027 - RTRS
-M|QATAR HOLDS TEHRAN TALKS - REUTERS
-A|XI: TAIWAN REUNION CERTAIN - AL JAZ
-A|XI HOSTS US-RUSSIA TRILATERAL - RTRS
-A|JAPAN, INDIA SIGN MISSILE PACT - QNC
-A|TAIWAN FLAGS 2700 ACCOUNTS - TAIWAN+
-E|UK, EU CLINCH FOOD DEAL - REUTERS
-E|FRANCE PROTESTS DRAW 82500 - REUTERS
-E|NASDAQ WORST WEEK SINCE 2020 - WSJ
-E|EU, INDONESIA SIGN TRADE DEAL - RTRS
-F|DRC EBOLA DEATHS TOP 5700 - AFP
-A|TIMOR QUAKE 6.8 SHAKES BANDA - USGS
-N|TRUMP THREATENS TAX ON AI - COGNOSCERE
-N|VA CHILD DIES OF MEASLES - COGNOSCERE
-L|MEXICO ARRESTS CARTEL KINGPIN - BREIT
-L|HEGSETH SIGNS VENEZUELA PACT - REUTERS
-L|LULA FISCAL BILL FACES VOTE - RIO
-L|LULA BACKS SANCHEZ IN SPAIN - BREIT
-S|CHELSEA STUNNED BY LEEDS - AKTUALITA
-S|REAL MADRID BEATS CELTA VIGO - AKT
-S|ROMA THRASH PARMA FIVE ONE - AKTUALITA
-S|BOCA WIN SUDAMERICANA TITLE - CONM
-S|ALCARAZ FACES ZVEREV IN FINAL - ATP
-S|LIVERPOOL HOST MAN UTD TODAY - PREM
-S|NFL: VIKINGS VS 49ERS IN MEXICO - NFL
-T|CLAUDE LINKED TO RIEMANN CLAIM - AI
-T|SPACEX LAUNCHES SPY SATS - SPACEFLIGHT
-T|DRAGON SPLASHES DOWN, SCIENCE - NASA
-T|BITCOIN REBOUNDS ABOVE 60000 - FINNHUB
-T|TENCENT RELEASES HY4 WEIGHTS - AI.INFO
-E|NVIDIA PLUNGES 14 PERCENT FRIDAY - WSJ
-N|NASDAQ PLUNGES, SP CORRECTS - REUTERS
-W|GTA VI EARNS 3.79 BILLION - WSJ
-W|MILEY CYRUS MARRIES MORANDO - ANI
-W|UN WEAPONS TALKS END WITHOUT DEAL - AP`.split('\n');
-const TC={A:e,M:d2,E:b,F:g,L:f,N:b,S:d2,T:e,W:y,O:f};
-const TL='00:00 COP31|05:00 HORMUZ|05:30 POLAND|06:00 NO DEAL|07:00 SPARTA|08:07 161 DOWN|08:50 GAZA|17:00 NATO|21:00 NASDAQ'.split('|');
-const CC=[d2,e,f,g];
-q(0,0,W,H,a);
-t('THE WORLD IN ONE DAY',(W-n('THE WORLD IN ONE DAY')*3)/2,20,6,b);
-q(24,70,976,2,b);
-t('MONDAY 23 NOVEMBER 2026 \u2022 50 STORIES \u2022 7 REGIONS \u2022 ALL TIMES UTC',(W-n('MONDAY 23 NOVEMBER 2026 \u2022 50 STORIES \u2022 7 REGIONS \u2022 ALL TIMES UTC'))/2,78,2,b);
-q(24,98,976,2,d2);
-q(24,108,976,128,h);q(24,108,8,128,d2);q(24,108,976,2,b);q(24,234,976,2,b);
-t(L[0],46,118,2,d2);t(L[1],46,140,3,b);
-t(L[2],46,166,2,b);t(L[3],46,184,2,b);t(L[4],46,202,2,b);t(L[5],46,220,2,y);
-c(924,172,52,e);c(924,172,48,h);q(876,171,96,2,e);q(923,124,2,96,e);c(948,150,7,d2);
-E.forEach((f2,i)=>{const s=f2.split('|'),x=24+(i%3)*328,y2=246+Math.floor(i/3)*148;
-q(x,y2,320,140,h);
-t(s[0],x+10,y2+10,2,d2);I(+s[6],x+276,y2+8,CC[+s[7]]);
-t(s[1],x+10,y2+34,2,b);t(s[2],x+10,y2+52,2,b);
-t(s[3],x+10,y2+76,2,y);t(s[4],x+10,y2+92,2,y);
-t(s[5],x+10,y2+112,2,y);});
-t('THE REST OF THE DAY - 43 MORE',24,544,2,b);
-t('ALL FIRST REPORTED 23 NOV 2026',W-24-n('ALL FIRST REPORTED 23 NOV 2026'),544,2,d2);
-let X=24;for(const [s2,c2] of [['MEAST',d2],['EUROPE',b],['ASIA',e],['AFRICA',g],['LATAM',f],['N.AMERICA',b],['OCEANIA',f],['SPORT',d2],['TECH',e],['WORLD',y]]){q(X,578,10,10,c2);X=t(s2,X+14,576,2,b)+8;}
-J.forEach((row,i)=>{const s=row.split('|'),col=i<22?0:1,j=i<22?i:i-22,x=24+col*498,y2=598+j*16;
-q(x,y2+2,10,10,TC[s[0]]);t(s[1],x+16,y2,2,b);});
-q(24,958,976,40,b);
-const l1=TL.slice(0,5).join(' \u2022 '),l2=TL.slice(5).join(' \u2022 ');
-t(l1,(W-n(l1))/2,964,2,v);t(l2,(W-n(l2))/2,980,2,v);
-t('DATE CHECK: ALL 50 STORIES FIRST REPORTED MONDAY 23 NOVEMBER 2026',(W-n('DATE CHECK: ALL 50 STORIES FIRST REPORTED MONDAY 23 NOVEMBER 2026'))/2,1004,2,d2);
-const C2=(t2,d3)=>{const o=Buffer.alloc(8+d3.length+4);o.writeUInt32BE(d3.length,0);o.write(t2,4,'ascii');d3.copy(o,8);o.writeUInt32BE(v2(Buffer.concat([Buffer.from(t2,'ascii'),d3])),8+d3.length);return o;};
-const ih=Buffer.alloc(13);ih.writeUInt32BE(W,0);ih.writeUInt32BE(H,4);ih[8]=8;ih[9]=2;
-const ra=Buffer.alloc(H*(1+W*3));for(let y2=0;y2<H;y2++){ra[y2*(1+W*3)]=0;p.copy(ra,y2*(1+W*3)+1,y2*W*3,(y2+1)*W*3);}
-const P=Buffer.concat([Buffer.from([137,80,78,71,13,10,26,10]),C2('IHDR',ih),C2('IDAT',z(ra,{level:9})),C2('IEND',Buffer.alloc(0))]);
-const D=process.env.MAKEFUN_OUTPUT_DIR?r(d(u(import.meta.url)),process.env.MAKEFUN_OUTPUT_DIR):'/output';
-m(D,{recursive:true});w(r(D,'entry.png'),P);
+import{join as j}from'node:path';
+const W=1024,H=1024,O=process.env.MAKEFUN_OUTPUT_DIR||'/output';
+const PAPER=[246,242,233],INK=[22,22,22],NAVY=[16,32,64],RED=[178,34,34],WHITE=[255,255,255],GREY=[110,110,110],GOLD=[200,160,40];
+const RC={EU:[30,80,160],AS:[0,130,120],ME:[178,34,34],AM:[110,60,160],AF:[200,110,0],MK:[0,130,60],SP:[180,40,120]};
+const buf=Buffer.alloc(W*H*3);
+function px(x,y,c){if(x<0||y<0||x>=W||y>=H)return;const i=(y*W+x)*3;buf[i]=c[0];buf[i+1]=c[1];buf[i+2]=c[2];}
+function rect(x,y,w,h,c){for(let j=y;j<y+h;j++)for(let i=x;i<x+w;i++)px(i,j,c);}
+function line(x0,y0,x1,y1,c){const dx=x1-x0,dy=y1-y0,n=Math.max(Math.abs(dx),Math.abs(dy),1);for(let s=0;s<=n;s++)px(Math.round(x0+dx*s/n),Math.round(y0+dy*s/n),c);}
+function circ(cx,cy,r,c){for(let a=0;a<360;a+=4){const t=a*Math.PI/180;px(Math.round(cx+r*Math.cos(t)),Math.round(cy+r*Math.sin(t)),c);}}
+const FONT={A:[14,17,17,31,17,17,17],B:[30,17,17,30,17,17,30],C:[14,17,16,16,16,17,14],D:[30,17,17,17,17,17,30],E:[31,16,16,30,16,16,31],F:[31,16,16,30,16,16,16],G:[14,17,16,23,17,17,15],H:[17,17,17,31,17,17,17],I:[14,4,4,4,4,4,14],J:[7,2,2,2,2,18,12],K:[17,18,20,24,20,18,17],L:[16,16,16,16,16,16,31],M:[17,27,21,21,17,17,17],N:[17,25,21,19,17,17,17],O:[14,17,17,17,17,17,14],P:[30,17,17,30,16,16,16],Q:[14,17,17,17,21,18,13],R:[30,17,17,30,20,18,17],S:[15,16,16,14,1,1,30],T:[31,4,4,4,4,4,4],U:[17,17,17,17,17,17,14],V:[17,17,17,17,17,10,4],W:[17,17,17,21,21,27,17],X:[17,17,10,4,10,17,17],Y:[17,17,10,4,4,4,4],Z:[31,1,2,4,8,16,31],'0':[14,17,19,21,25,17,14],'1':[4,12,4,4,4,4,14],'2':[14,17,1,6,8,16,31],'3':[31,2,4,2,1,17,14],'4':[2,6,10,18,31,2,2],'5':[31,16,30,1,1,17,14],'6':[6,8,16,30,17,17,14],'7':[31,1,2,4,8,8,8],'8':[14,17,17,14,17,17,14],'9':[14,17,17,15,1,2,12],' ':[0,0,0,0,0,0,0],'.':[0,0,0,0,0,12,12],',':[0,0,0,0,12,4,8],':':[0,12,12,0,12,12,0],';':[0,12,12,0,12,4,8],"'":[4,4,8,0,0,0,0],'-':[0,0,0,14,0,0,0],'(':[2,4,8,8,8,4,2],')':[8,4,2,2,2,4,8],'/':[1,1,2,4,8,16,16],'%':[25,25,2,4,8,19,19],'&':[12,18,20,8,21,18,13],'+':[0,4,4,31,4,4,0],'=':[0,0,31,0,31,0,0],'!':[4,4,4,4,4,0,4],'?':[14,17,1,2,4,0,4],$:[4,15,20,14,5,30,4],'|':[4,4,4,4,4,4,4]};
+function text(s,x,y,sc,col){let cx=x;for(const ch of s){const g=FONT[ch]||FONT['?'];for(let r=0;r<7;r++){const row=g[r];for(let c=0;c<5;c++)if(row&(16>>c))rect(cx+c*sc,y+r*sc,sc,sc,col);}cx+=6*sc;}}
+function globe(x,y,s,c){const r=22*s;circ(x,y,r,c);line(x-r,y,x+r,y,c);line(x,y-r,x,y+r,c);circ(x,y,Math.round(r*0.55),c);const a=Math.round(r*0.8),b=Math.round(r*0.55);line(x-a,y-b,x+a,y-b,c);line(x-a,y+b,x+a,y+b,c);}
+function drone(x,y,s,c){rect(x-4*s,y-2*s,8*s,4*s,c);line(x,y,x-14*s,y-10*s,c);line(x,y,x+14*s,y-10*s,c);line(x,y,x-14*s,y+10*s,c);line(x,y,x+14*s,y+10*s,c);circ(x-16*s,y-12*s,5*s,c);circ(x+16*s,y-12*s,5*s,c);circ(x-16*s,y+12*s,5*s,c);circ(x+16*s,y+12*s,5*s,c);}
+function ship(x,y,s,c){rect(x-22*s,y,44*s,4*s,c);rect(x-18*s,y+4*s,36*s,4*s,c);rect(x-14*s,y+8*s,28*s,4*s,c);line(x,y,x,y-16*s,c);rect(x,y-16*s,10*s,5*s,c);line(x-24*s,y+16*s,x+24*s,y+16*s,c);line(x-20*s,y+20*s,x+20*s,y+20*s,c);}
+function chart(x,y,s,c){line(x-20*s,y+16*s,x+22*s,y+16*s,c);line(x-20*s,y+16*s,x-20*s,y-18*s,c);line(x-18*s,y-12*s,x-6*s,y-2*s,c);line(x-6*s,y-2*s,x+4*s,y-8*s,c);line(x+4*s,y-8*s,x+14*s,y+8*s,c);line(x+14*s,y+8*s,x+20*s,y+14*s,c);}
+function summit(x,y,s,c){line(x-16*s,y+14*s,x-16*s,y-14*s,c);line(x,y+14*s,x,y-14*s,c);line(x+16*s,y+14*s,x+16*s,y-14*s,c);rect(x-16*s,y-14*s,9*s,5*s,c);rect(x,y-14*s,9*s,5*s,c);rect(x+16*s,y-14*s,9*s,5*s,c);line(x-20*s,y+14*s,x+20*s,y+14*s,c);}
+function tanker(x,y,s,c){rect(x-22*s,y+4*s,44*s,6*s,c);rect(x-18*s,y+10*s,36*s,4*s,c);rect(x+8*s,y-4*s,8*s,8*s,c);rect(x-2*s,y-16*s,4*s,4*s,c);rect(x-4*s,y-12*s,8*s,4*s,c);rect(x-5*s,y-8*s,10*s,4*s,c);rect(x-3*s,y-4*s,6*s,4*s,c);}
+function ball(x,y,s,c){circ(x,y,14*s,c);line(x-14*s,y,x+14*s,y,c);line(x,y-14*s,x,y+14*s,c);circ(x,y,5*s,c);}
+function pic(n,x,y,s,c){if(n===0)globe(x,y,s,c);else if(n===1)drone(x,y,s,c);else if(n===2)ship(x,y,s,c);else if(n===3)chart(x,y,s,c);else if(n===4)summit(x,y,s,c);else if(n===5)tanker(x,y,s,c);else ball(x,y,s,c);}
+const LEAD={tag:'CLIMATE - COP31',place:'ANTALYA, TURKEY',h1:'COP31 COLLAPSES,',h2:'NO DEAL',s1:'EU AND 130 NATIONS REJECT TEXT',s2:'WITH NO FOSSIL FUELS IN IT'};
+const FEAT=[{tag:'EU',name:'UKRAINE',pic:1,l:['186 DRONES, 161 DOWNED','DYMER FLAT HIT, 10 DEAD','BOY, 7, PULLED ALIVE']},{tag:'AF',name:'LIBYA',pic:2,l:['RUSSIAN WARSHIP SINKS','MERKURY HIT AT BENGHAZI','SUSPECTED DRONE ATTACK']},{tag:'MK',name:'MARKETS',pic:3,l:['NIKKEI -5.06%, ASIA SINKS','NASDAQ WORST WEEK','SINCE MARCH 2020']},{tag:'AS',name:'SHENZHEN',pic:4,l:['TRUMP, PUTIN, XI MEET','IN SHENZHEN, PEACE VOW','DECLARATION SIGNED']},{tag:'ME',name:'HORMUZ',pic:5,l:['TANKERS ABLAZE','MINES HIT SHIPS','IRAN WAR SPREADS']},{tag:'AM',name:'WASHINGTON',pic:6,l:['DEMOCRATS WIN HOUSE','258 SEATS, MOST SINCE','1992, RECOUNT FLIP']}];
+const LIST=[['EU','KYIV FLAT SEARCH: 14 MISSING'],['EU','POLAND: 3 MISSILES CROSSED FRIDAY'],['EU','NATO CRISIS TALKS ON UKRAINE'],['EU','UK SENDS 1,000 MISSILES TO KYIV'],['EU','FRANCE HOPEFULS QUERY UKRAINE AID'],['EU','SLOVAKIA SKIPS EU UKRAINE LOAN'],['EU','DENMARK EXPELS RUSSIAN ATTACHE'],['EU','BELGIUM AIRPORTS SHUT BY STRIKE'],['EU','KURSK: UKRAINE TAKES NOVYI PUT'],['EU','KALININGRAD DRONES FIRST TIME'],['EU','KRYVYI RIH STRIKE: 2 DEAD, 60 HURT'],['EU','CARGO SHIP HIT OFF FINLAND'],['AS','TAIWAN STOCKS SWING 1,578 POINTS'],['AS','TSMC TURNS HIGHER, UP 2%'],['AS','S. KOREA EXPORTS TOP $1 TRILLION'],['AS','SEOUL MINISTER QUITS OVER EXAM SCAM'],['AS','S. KOREA STOCKS PLUNGE ON AI FEAR'],['AS','INDONESIA FACTORY FIRE: 24 DEAD'],['AS','SELANGOR FLOODS: 1,800 EVACUATED'],['AS','CHINA HACKERS USE AI ON UNIVERSITIES'],['AS','INDIA YOUTH PROTEST META BLOCKS'],['ME','GAZA STRIKE KILLS 3'],['ME','GAZA TOLL REACHES 74,742'],['ME','ISRAEL, US PLAN FOR IRAN TENSIONS'],['ME','IRAN STRIKE INJURES 2 IN BAHRAIN'],['ME','LEBANON: ISRAEL PULLOUT DEMANDED'],['ME','HAMAS EXECUTES COLLABORATOR'],['ME','IRAQ POWER PLANT FIRE: 4 DEAD'],['ME','SYRIA ARRESTS 2014 AMBUSH OFFICER'],['ME','HOUTHI DRONE INTERCEPTED BY COALITION'],['AM','TRUMP: PUTIN IS MY FRIEND'],['AM','US ARMY TO BLAST IOWA EXPLOSIVES'],['AM','US PORTS HIT BY CYBERATTACK SURGE'],['AM','MEXICO NABS CARTEL BOSS ISIDRO'],['AM','TRUMP REPOSTS TRUMPCARE PITCH'],['AM','CALIFORNIA SUBPOENAS NVIDIA'],['AM','NVIDIA -14% ON SEC PROBE'],['AM','S&P 500 INTO CORRECTION'],['AM','WALL ST FEARS $80.6BN MORE SELLING'],['AF','EBOLA DEATHS PASS 5,700 IN CONGO'],['AF','CAMEROON EX-REBELS IN LIMBO'],['SP','LIVERPOOL 4-0 MAN UTD'],['SP','ALCARAZ WINS ATP FINALS']];
+const TL=[['01:51','BENGHAZI SECURE'],['02:35','FACTORY FIRE: 24 DEAD'],['03:15','BELGIUM AIRPORTS SHUT'],['04:38','BOY, 7, RESCUED'],['05:12','AIR DEFENCE PLEDGED'],['07:42','WALL ST FEARS SELLING']];
+rect(0,0,W,H,PAPER);
+rect(0,0,W,72,NAVY);
+text('THE WORLD IN ONE DAY',212,8,5,WHITE);
+text('MONDAY 23 NOVEMBER 2026',368,50,2,GOLD);
+rect(0,72,10,190,RED);
+text(LEAD.tag+' | '+LEAD.place,26,86,2,RED);
+text(LEAD.h1,26,112,5,INK);
+text(LEAD.h2,26,152,5,INK);
+text(LEAD.s1,26,198,2,INK);
+text(LEAD.s2,26,220,2,INK);
+pic(0,880,165,2,RED);
+rect(0,262,W,2,INK);
+for(let i=0;i<6;i++){const f=FEAT[i],cx=8+(i%3)*336,cy=272+Math.floor(i/3)*110;rect(cx,cy,328,104,WHITE);rect(cx,cy,328,3,RC[f.tag]);text(f.tag+' - '+f.name,cx+10,cy+12,2,RC[f.tag]);text(f.l[0],cx+10,cy+36,2,INK);text(f.l[1],cx+10,cy+58,2,INK);text(f.l[2],cx+10,cy+80,2,INK);pic(f.pic,cx+300,cy+20,1,RC[f.tag]);}
+rect(0,494,W,2,INK);
+text('REPORTED (UTC) - MONDAY 23 NOVEMBER 2026',8,506,2,INK);
+for(let i=0;i<TL.length;i++){const x=8+i*168;text(TL[i][0],x,530,2,RED);text(TL[i][1],x,552,1,INK);}
+text('THE REST OF THE DAY',8,582,2,INK);
+pic(6,990,590,1,RED);
+rect(0,606,W,2,INK);rect(508,616,2,350,GREY);
+for(let i=0;i<LIST.length;i++){const col=i<22?0:1,row=i<22?i:i-22,x=8+col*508,y=616+row*16;text(LIST[i][0]+' -',x,y,2,RC[LIST[i][0]]);text(LIST[i][1],x+56,y,2,INK);}
+rect(0,972,W,52,NAVY);
+text('DATE CHECK: ALL 50 STORIES FIRST REPORTED MONDAY 23 NOVEMBER 2026',104,982,2,WHITE);
+text('EU EUROPE - AS ASIA - ME MIDDLE EAST - AM AMERICAS - AF AFRICA - MK MARKETS - SP SPORT',248,1004,1,GOLD);
+const CT=[];
+for(let n=0;n<256;n++){let c=n;for(let k=0;k<8;k++)c=c&1?0xedb88320^(c>>>1):c>>>1;CT[n]=c>>>0;}
+function crc(b){let c=0xffffffff;for(let i=0;i<b.length;i++)c=CT[(c^b[i])&0xff]^(c>>>8);return(c^0xffffffff)>>>0;}
+function chk(t,d){const o=Buffer.alloc(12+d.length);o.writeUInt32BE(d.length,0);o.write(t,4,'ascii');d.copy(o,8);o.writeUInt32BE(crc(o.subarray(4,8+d.length)),8+d.length);return o;}
+const ih=Buffer.alloc(13);
+ih.writeUInt32BE(W,0);ih.writeUInt32BE(H,4);ih[8]=8;ih[9]=2;ih[10]=0;ih[11]=0;ih[12]=0;
+const raw=Buffer.alloc(H*(1+W*3));
+for(let y=0;y<H;y++){raw[y*(1+W*3)]=0;buf.copy(raw,y*(1+W*3)+1,y*W*3,(y+1)*W*3);}
+const png=Buffer.concat([Buffer.from([137,80,78,71,13,10,26,10]),chk('IHDR',ih),chk('IDAT',z(raw,{level:9})),chk('IEND',Buffer.alloc(0))]);
+m(O,{recursive:true});
+w(j(O,'entry.png'),png);
